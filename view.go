@@ -44,6 +44,7 @@ type View struct {
 	Hidden  bool
 
 	Handler Handler
+	Framer  Framer
 
 	containerEmbed
 	flexEmbed
@@ -73,7 +74,7 @@ func (v *View) processHandler() {
 		return
 	}
 	if u, ok := v.Handler.(Updater); ok {
-		u.Update(v)
+		u.Update(v.frame, v)
 		return
 	}
 }

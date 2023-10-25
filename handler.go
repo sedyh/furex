@@ -9,6 +9,10 @@ import (
 // Handler represents a component that can be added to a container.
 type Handler interface{}
 
+type Framer interface {
+	Frame(frame image.Rectangle) image.Rectangle
+}
+
 // Drawer represents a component that can be added to a container.
 type Drawer interface {
 	// Draw function draws the content of the component inside the frame.
@@ -18,7 +22,7 @@ type Drawer interface {
 // Updater represents a component that updates by one tick.
 type Updater interface {
 	// Update updates the state of the component by one tick.
-	Update(v *View)
+	Update(frame image.Rectangle, v *View)
 }
 
 // DrawHandler represents a component that can be added to a container.
