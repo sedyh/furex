@@ -2,9 +2,10 @@ package furex
 
 import (
 	"fmt"
-	"image"
 	"strings"
 	"sync"
+
+	"github.com/sedyh/furex/v2/geo"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -14,18 +15,18 @@ import (
 // Handlers can be set to create custom component such as button or list.
 type View struct {
 	// TODO: Remove these fields in the future.
-	Left         int
-	Right        *int
-	Top          int
-	Bottom       *int
-	Width        int
+	Left         float64
+	Right        *float64
+	Top          float64
+	Bottom       *float64
+	Width        float64
 	WidthInPct   float64
-	Height       int
+	Height       float64
 	HeightInPct  float64
-	MarginLeft   int
-	MarginTop    int
-	MarginRight  int
-	MarginBottom int
+	MarginLeft   float64
+	MarginTop    float64
+	MarginRight  float64
+	MarginBottom float64
 	Position     Position
 	Direction    Direction
 	Wrap         FlexWrap
@@ -44,7 +45,6 @@ type View struct {
 	Hidden  bool
 
 	Handler Handler
-	Framer  Framer
 
 	containerEmbed
 	flexEmbed
@@ -83,7 +83,7 @@ func (v *View) startLayout() {
 	v.lock.Lock()
 	defer v.lock.Unlock()
 	if !v.hasParent {
-		v.frame = image.Rect(v.Left, v.Top, v.Left+v.Width, v.Top+v.Height)
+		v.frame = geo.Rect(v.Left, v.Top, v.Left+v.Width, v.Top+v.Height)
 	}
 	v.flexEmbed.View = v
 
@@ -98,7 +98,7 @@ func (v *View) startLayout() {
 }
 
 // UpdateWithSize the view with modified height and width
-func (v *View) UpdateWithSize(width, height int) {
+func (v *View) UpdateWithSize(width, height float64) {
 	if !v.hasParent && (v.Width != width || v.Height != height) {
 		v.Height = height
 		v.Width = width
@@ -198,7 +198,7 @@ func (v *View) isWidthFixed() bool {
 	return v.Width != 0 || v.WidthInPct != 0
 }
 
-func (v *View) width() int {
+func (v *View) width() float64 {
 	if v.Width == 0 {
 		return v.calculatedWidth
 	}
@@ -209,7 +209,7 @@ func (v *View) isHeightFixed() bool {
 	return v.Height != 0 || v.HeightInPct != 0
 }
 
-func (v *View) height() int {
+func (v *View) height() float64 {
 	if v.Height == 0 {
 		return v.calculatedHeight
 	}
@@ -252,61 +252,61 @@ func (v *View) MustGetByID(id string) *View {
 }
 
 // SetLeft sets the left position of the view.
-func (v *View) SetLeft(left int) {
+func (v *View) SetLeft(left float64) {
 	v.Left = left
 	v.Layout()
 }
 
 // SetRight sets the right position of the view.
-func (v *View) SetRight(right int) {
-	v.Right = Int(right)
+func (v *View) SetRight(right float64) {
+	v.Right = Float(right)
 	v.Layout()
 }
 
 // SetTop sets the top position of the view.
-func (v *View) SetTop(top int) {
+func (v *View) SetTop(top float64) {
 	v.Top = top
 	v.Layout()
 }
 
 // SetBottom sets the bottom position of the view.
-func (v *View) SetBottom(bottom int) {
-	v.Bottom = Int(bottom)
+func (v *View) SetBottom(bottom float64) {
+	v.Bottom = Float(bottom)
 	v.Layout()
 }
 
 // SetWidth sets the width of the view.
-func (v *View) SetWidth(width int) {
+func (v *View) SetWidth(width float64) {
 	v.Width = width
 	v.Layout()
 }
 
 // SetHeight sets the height of the view.
-func (v *View) SetHeight(height int) {
+func (v *View) SetHeight(height float64) {
 	v.Height = height
 	v.Layout()
 }
 
 // SetMarginLeft sets the left margin of the view.
-func (v *View) SetMarginLeft(marginLeft int) {
+func (v *View) SetMarginLeft(marginLeft float64) {
 	v.MarginLeft = marginLeft
 	v.Layout()
 }
 
 // SetMarginTop sets the top margin of the view.
-func (v *View) SetMarginTop(marginTop int) {
+func (v *View) SetMarginTop(marginTop float64) {
 	v.MarginTop = marginTop
 	v.Layout()
 }
 
 // SetMarginRight sets the right margin of the view.
-func (v *View) SetMarginRight(marginRight int) {
+func (v *View) SetMarginRight(marginRight float64) {
 	v.MarginRight = marginRight
 	v.Layout()
 }
 
 // SetMarginBottom sets the bottom margin of the view.
-func (v *View) SetMarginBottom(marginBottom int) {
+func (v *View) SetMarginBottom(marginBottom float64) {
 	v.MarginBottom = marginBottom
 	v.Layout()
 }
@@ -401,7 +401,7 @@ func (v *View) Config() ViewConfig {
 	return cfg
 }
 
-func (v *View) handleDrawRoot(screen *ebiten.Image, b image.Rectangle) {
+func (v *View) handleDrawRoot(screen *ebiten.Image, b geo.Rectangle) {
 	if h, ok := v.Handler.(DrawHandler); ok {
 		h.HandleDraw(screen, b)
 		return
@@ -415,16 +415,16 @@ func (v *View) handleDrawRoot(screen *ebiten.Image, b image.Rectangle) {
 type ViewConfig struct {
 	TagName      string
 	ID           string
-	Left         int
-	Right        *int
-	Top          int
-	Bottom       *int
-	Width        int
-	Height       int
-	MarginLeft   int
-	MarginTop    int
-	MarginRight  int
-	MarginBottom int
+	Left         float64
+	Right        *float64
+	Top          float64
+	Bottom       *float64
+	Width        float64
+	Height       float64
+	MarginLeft   float64
+	MarginTop    float64
+	MarginRight  float64
+	MarginBottom float64
 	Position     Position
 	Direction    Direction
 	Wrap         FlexWrap
@@ -449,7 +449,8 @@ func (cfg ViewConfig) tree(indent string) string {
 	}
 	sb.WriteString("style=\"")
 	sb.WriteString(
-		fmt.Sprintf("left: %d, right: %d, top: %d, bottom: %d, width: %d, height: %d, marginLeft: %d, marginTop: %d, marginRight: %d, marginBottom: %d, position: %s, direction: %s, wrap: %s, justify: %s, alignItems: %s, alignContent: %s, grow: %f, shrink: %f",
+		fmt.Sprintf(
+			"left: %f, right: %f, top: %f, bottom: %f, width: %f, height: %f, marginLeft: %f, marginTop: %f, marginRight: %f, marginBottom: %f, position: %s, direction: %s, wrap: %s, justify: %s, alignItems: %s, alignContent: %s, grow: %f, shrink: %f",
 			cfg.Left, *cfg.Right, cfg.Top, *cfg.Bottom, cfg.Width, cfg.Height, cfg.MarginLeft, cfg.MarginTop, cfg.MarginRight, cfg.MarginBottom, cfg.Position, cfg.Direction, cfg.Wrap, cfg.Justify, cfg.AlignItems, cfg.AlignContent, cfg.Grow, cfg.Shrink))
 	sb.WriteString("\">\n")
 	for _, child := range cfg.children {

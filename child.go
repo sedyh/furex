@@ -1,9 +1,10 @@
 package furex
 
 import (
-	"image"
 	"math"
 	"time"
+
+	"github.com/sedyh/furex/v2/geo"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -11,7 +12,7 @@ import (
 type child struct {
 	absolute                 bool
 	item                     *View
-	bounds                   image.Rectangle
+	bounds                   geo.Rectangle
 	isButtonPressed          bool
 	isMouseLeftButtonHandler bool
 	isMouseEntered           bool
@@ -29,7 +30,7 @@ type swipe struct {
 }
 
 func (c *child) HandleJustPressedTouchID(
-	frame *image.Rectangle, touchID ebiten.TouchID, x, y int) bool {
+	frame *geo.Rectangle, touchID ebiten.TouchID, x, y int) bool {
 	var result = false
 	if c.checkButtonHandlerStart(frame, touchID, x, y) {
 		result = true
@@ -42,16 +43,16 @@ func (c *child) HandleJustPressedTouchID(
 }
 
 func (c *child) HandleJustReleasedTouchID(
-	frame *image.Rectangle, touchID ebiten.TouchID, x, y int) {
+	frame *geo.Rectangle, touchID ebiten.TouchID, x, y int) {
 	c.checkTouchHandlerEnd(frame, touchID, x, y)
 	c.checkButtonHandlerEnd(frame, touchID, x, y)
 	c.checkSwipeHandlerEnd(frame, touchID, x, y)
 }
 
-func (c *child) checkTouchHandlerStart(frame *image.Rectangle, touchID ebiten.TouchID, x, y int) bool {
+func (c *child) checkTouchHandlerStart(frame *geo.Rectangle, touchID ebiten.TouchID, x, y int) bool {
 	touchHandler, ok := c.item.Handler.(TouchHandler)
 	if ok {
-		if isInside(frame, x, y) {
+		if isInside(frame, float64(x), float64(y)) {
 			if touchHandler.HandleJustPressedTouchID(touchID, x, y) {
 				c.handledTouchID = touchID
 				return true
@@ -61,7 +62,7 @@ func (c *child) checkTouchHandlerStart(frame *image.Rectangle, touchID ebiten.To
 	return false
 }
 
-func (c *child) checkTouchHandlerEnd(frame *image.Rectangle, touchID ebiten.TouchID, x, y int) {
+func (c *child) checkTouchHandlerEnd(frame *geo.Rectangle, touchID ebiten.TouchID, x, y int) {
 	touchHandler, ok := c.item.Handler.(TouchHandler)
 	if ok {
 		if c.handledTouchID == touchID {
@@ -71,10 +72,10 @@ func (c *child) checkTouchHandlerEnd(frame *image.Rectangle, touchID ebiten.Touc
 	}
 }
 
-func (c *child) checkSwipeHandlerStart(frame *image.Rectangle, touchID ebiten.TouchID, x, y int) bool {
+func (c *child) checkSwipeHandlerStart(frame *geo.Rectangle, touchID ebiten.TouchID, x, y int) bool {
 	_, ok := c.item.Handler.(SwipeHandler)
 	if ok {
-		if isInside(frame, x, y) {
+		if isInside(frame, float64(x), float64(y)) {
 			c.swipeTouchID = touchID
 			c.swipe.downTime = time.Now()
 			c.swipe.downX, c.swipe.downY = x, y
@@ -84,7 +85,7 @@ func (c *child) checkSwipeHandlerStart(frame *image.Rectangle, touchID ebiten.To
 	return false
 }
 
-func (c *child) checkSwipeHandlerEnd(frame *image.Rectangle, touchID ebiten.TouchID, x, y int) bool {
+func (c *child) checkSwipeHandlerEnd(frame *geo.Rectangle, touchID ebiten.TouchID, x, y int) bool {
 	swipeHandler, ok := c.item.Handler.(SwipeHandler)
 	if ok {
 		if c.swipeTouchID != touchID {
@@ -133,7 +134,7 @@ func (c *child) checkSwipe() bool {
 	return false
 }
 
-func (c *child) checkButtonHandlerStart(frame *image.Rectangle, touchID ebiten.TouchID, x, y int) bool {
+func (c *child) checkButtonHandlerStart(frame *geo.Rectangle, touchID ebiten.TouchID, x, y int) bool {
 	button, ok := c.item.Handler.(ButtonHandler)
 	if ok {
 		for {
@@ -142,7 +143,7 @@ func (c *child) checkButtonHandlerStart(frame *image.Rectangle, touchID ebiten.T
 					break
 				}
 			}
-			if isInside(frame, x, y) {
+			if isInside(frame, float64(x), float64(y)) {
 				if !c.isButtonPressed {
 					c.isButtonPressed = true
 					c.handledTouchID = touchID
@@ -158,7 +159,7 @@ func (c *child) checkButtonHandlerStart(frame *image.Rectangle, touchID ebiten.T
 	return false
 }
 
-func (c *child) checkButtonHandlerEnd(frame *image.Rectangle, touchID ebiten.TouchID, x, y int) {
+func (c *child) checkButtonHandlerEnd(frame *geo.Rectangle, touchID ebiten.TouchID, x, y int) {
 	button, ok := c.item.Handler.(ButtonHandler)
 	if ok {
 		if c.handledTouchID == touchID {
@@ -168,7 +169,7 @@ func (c *child) checkButtonHandlerEnd(frame *image.Rectangle, touchID ebiten.Tou
 				if x == 0 && y == 0 {
 					button.HandleRelease(x, y, false)
 				} else {
-					button.HandleRelease(x, y, !isInside(frame, x, y))
+					button.HandleRelease(x, y, !isInside(frame, float64(x), float64(y)))
 				}
 			}
 		}

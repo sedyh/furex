@@ -1,8 +1,9 @@
 package furex
 
 import (
-	"image"
 	"testing"
+
+	"github.com/sedyh/furex/v2/geo"
 
 	"github.com/stretchr/testify/require"
 )
@@ -29,7 +30,7 @@ func TestAddChildUpdateRemove(t *testing.T) {
 	require.True(t, mock.IsUpdated)
 
 	view.Draw(nil)
-	require.Equal(t, image.Rect(0, 0, 10, 10), mock.Frame)
+	require.Equal(t, geo.Rect(0, 0, 10, 10), mock.Frame)
 
 	require.True(t, view.RemoveChild(child))
 	require.Equal(t, 0, len(view.children))
@@ -56,7 +57,7 @@ func TestUpdateWithSize(t *testing.T) {
 	require.True(t, mock.IsUpdated)
 
 	view.Draw(nil)
-	require.Equal(t, image.Rect(95, 95, 105, 105), mock.Frame)
+	require.Equal(t, geo.Rect(95, 95, 105, 105), mock.Frame)
 
 }
 
@@ -112,8 +113,8 @@ func TestAddChild(t *testing.T) {
 	require.True(t, mocks[1].IsUpdated)
 
 	view.Draw(nil)
-	require.Equal(t, image.Rect(0, 0, 10, 10), mocks[0].Frame)
-	require.Equal(t, image.Rect(10, 0, 20, 10), mocks[1].Frame)
+	require.Equal(t, geo.Rect(0, 0, 10, 10), mocks[0].Frame)
+	require.Equal(t, geo.Rect(10, 0, 20, 10), mocks[1].Frame)
 
 	view.RemoveAll()
 	require.Equal(t, 0, len(view.children))

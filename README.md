@@ -35,24 +35,24 @@ If you are not familiar with Flexbox Layout, you can learn about it at this [web
 
 Here are some of the key features of Furex:
 
-- Flexbox layout: The UI layout can be configured using the properties of [View](https://pkg.go.dev/github.com/yohamta/furex/v2#View) instances, which can be thought of as equivalent to `DIV` elements in HTML. These views can be stacked or nested to create complex layouts.
+- Flexbox layout: The UI layout can be configured using the properties of [View](https://pkg.go.dev/github.com/sedyh/furex/v2#View) instances, which can be thought of as equivalent to `DIV` elements in HTML. These views can be stacked or nested to create complex layouts.
 
-- Custom widgets: `View` instances can receive a `Handler` which is responsible for drawing and updating the view. This allows users to create any type of UI component by implementing the appropriate handler interfaces, such as [Drawer](https://pkg.go.dev/github.com/yohamta/furex/v2#Drawer), [Updater](https://pkg.go.dev/github.com/yohamta/furex/v2#Updater), and more.
+- Custom widgets: `View` instances can receive a `Handler` which is responsible for drawing and updating the view. This allows users to create any type of UI component by implementing the appropriate handler interfaces, such as [Drawer](https://pkg.go.dev/github.com/sedyh/furex/v2#Drawer), [Updater](https://pkg.go.dev/github.com/sedyh/furex/v2#Updater), and more.
 
-- Button support: To create a button, users can implement the [ButtonHandler](https://pkg.go.dev/github.com/yohamta/furex/v2#ButtonHandler) interface. This supports both touch and mouse input for button actions. See the [Example Button](./examples/game/widgets/button.go) for more details.
+- Button support: To create a button, users can implement the [ButtonHandler](https://pkg.go.dev/github.com/sedyh/furex/v2#ButtonHandler) interface. This supports both touch and mouse input for button actions. See the [Example Button](./examples/game/widgets/button.go) for more details.
 
-- Touch and mouse events: Furex provides support for handling touch events and positions using the [TouchHandler](https://pkg.go.dev/github.com/yohamta/furex/v2#TouchHandler) interface, and mouse click events using the [MouseLeftButtonHandler](https://pkg.go.dev/github.com/yohamta/furex/v2#MouseLeftButtonHandler) interface. It also offers support for detecting mouse position events using the [MouseHandler](https://pkg.go.dev/github.com/yohamta/furex/v2#MouseHandler) interface, and mouse enter/leave events using the [MouseEnterLeaveHandler](https://pkg.go.dev/github.com/yohamta/furex/v2#MouseEnterLeaveHandler) interface.
+- Touch and mouse events: Furex provides support for handling touch events and positions using the [TouchHandler](https://pkg.go.dev/github.com/sedyh/furex/v2#TouchHandler) interface, and mouse click events using the [MouseLeftButtonHandler](https://pkg.go.dev/github.com/sedyh/furex/v2#MouseLeftButtonHandler) interface. It also offers support for detecting mouse position events using the [MouseHandler](https://pkg.go.dev/github.com/sedyh/furex/v2#MouseHandler) interface, and mouse enter/leave events using the [MouseEnterLeaveHandler](https://pkg.go.dev/github.com/sedyh/furex/v2#MouseEnterLeaveHandler) interface.
 
-- Swipe gestures: Users can detect swipe gestures by implementing the [SwipeHandler](https://pkg.go.dev/github.com/yohamta/furex/v2#SwipeHandler) interface.
+- Swipe gestures: Users can detect swipe gestures by implementing the [SwipeHandler](https://pkg.go.dev/github.com/sedyh/furex/v2#SwipeHandler) interface.
 
-These are just a few examples of the capabilities of Furex. For more information, be sure to check out the [GoDoc](https://pkg.go.dev/github.com/yohamta/furex/v2) documentation.
+These are just a few examples of the capabilities of Furex. For more information, be sure to check out the [GoDoc](https://pkg.go.dev/github.com/sedyh/furex/v2) documentation.
 
 ## Getting Started
 
 To get started with Furex, install Furex using the following command:
 
 ```sh
-go get github.com/yohamta/furex/v2
+go get github.com/sedyh/furex/v2
 ```
 
 ## Basic Usage
@@ -114,7 +114,7 @@ type Box struct {
 
 var _ furex.Drawer = (*Box)(nil)
 
-func (b *Box) Draw(screen *ebiten.Image, frame image.Rectangle, view *furex.View) {
+func (b *Box) Draw(screen *ebiten.Image, frame Rectangle, view *furex.View) {
   graphic.FillRect(screen, &graphic.FillRectOpts{
     Rect: frame, Color: b.Color,
   })

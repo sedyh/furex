@@ -1,8 +1,9 @@
 package furex
 
 import (
-	"image"
 	"testing"
+
+	"github.com/sedyh/furex/v2/geo"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -11,7 +12,7 @@ import (
 // TODO: refactor these tests to make them more readable.
 
 func TestFlexAlignments(t *testing.T) {
-	w, h := 100, 100
+	w, h := 100., 100.
 	child := &View{
 		Width:  50,
 		Height: 50,
@@ -20,7 +21,7 @@ func TestFlexAlignments(t *testing.T) {
 	var tests = []struct {
 		name string
 		flex *View
-		want image.Rectangle
+		want geo.Rectangle
 	}{
 		{
 			name: "Column - Center, Center",
@@ -31,7 +32,7 @@ func TestFlexAlignments(t *testing.T) {
 				Justify:    JustifyCenter,
 				AlignItems: AlignItemCenter,
 			},
-			want: image.Rect(25, 25, 75, 75),
+			want: geo.Rect(25, 25, 75, 75),
 		},
 		{
 			name: "Column - Start, End",
@@ -42,7 +43,7 @@ func TestFlexAlignments(t *testing.T) {
 				Justify:    JustifyStart,
 				AlignItems: AlignItemEnd,
 			},
-			want: image.Rect(50, 0, 100, 50),
+			want: geo.Rect(50, 0, 100, 50),
 		},
 		{
 			name: "Row - Center, Center",
@@ -53,7 +54,7 @@ func TestFlexAlignments(t *testing.T) {
 				Justify:    JustifyCenter,
 				AlignItems: AlignItemCenter,
 			},
-			want: image.Rect(25, 25, 75, 75),
+			want: geo.Rect(25, 25, 75, 75),
 		},
 		{
 			name: "Row - End, Start",
@@ -64,7 +65,7 @@ func TestFlexAlignments(t *testing.T) {
 				Justify:    JustifyEnd,
 				AlignItems: AlignItemStart,
 			},
-			want: image.Rect(50, 0, 100, 50),
+			want: geo.Rect(50, 0, 100, 50),
 		},
 	}
 	for _, tt := range tests {
@@ -109,11 +110,11 @@ func TestFlexWrap(t *testing.T) {
 	// └──────────────(100,200)──────────┘
 	// 															 (200,200)
 
-	assert.Equal(t, image.Rect(0, 100, 100, 200), mocks[2].Frame)
+	assert.Equal(t, geo.Rect(0, 100, 100, 200), mocks[2].Frame)
 }
 
 func TestAbsolutePos(t *testing.T) {
-	left, top := 20, 30
+	left, top := 20., 30.
 	f1 := &View{
 		Width:      100,
 		Height:     200,
@@ -152,22 +153,22 @@ func TestAbsolutePos(t *testing.T) {
 	//  └───────────┴───────────────────────┘
 	//                                  (150,200)
 
-	w, h := 30, 40
+	w, h := 30., 40.
 	x, y := 100/2-w/2+left, 200/2-h/2+top
-	require.Equal(t, image.Rect(x, y, x+w, y+h), mock.Frame)
+	require.Equal(t, geo.Rect(x, y, x+w, y+h), mock.Frame)
 }
 
 func TestAbsolutePosRightBottom(t *testing.T) {
 	mock := mockHandler{}
 
 	f1 := (&View{Width: 100, Height: 100}).addChild(
-		&View{Position: PositionAbsolute, Width: 10, Height: 10, Right: Int(40), Bottom: Int(50), Handler: &mock},
+		&View{Position: PositionAbsolute, Width: 10, Height: 10, Right: Float(40), Bottom: Float(50), Handler: &mock},
 	)
 
 	f1.Update()
 	f1.Draw(nil)
 
-	assert.Equal(t, image.Rect(50, 40, 60, 50), mock.Frame)
+	assert.Equal(t, geo.Rect(50, 40, 60, 50), mock.Frame)
 }
 
 func TestAbsolutePosNested(t *testing.T) {
@@ -220,11 +221,11 @@ func TestAbsolutePosNested(t *testing.T) {
 	//  └───────────┴───────────────────────┘
 	//                                  (150,200)
 
-	require.Equal(t, image.Rect(100, 50, 150, 200), f2.frame)
+	require.Equal(t, geo.Rect(100, 50, 150, 200), f2.frame)
 
-	w, h := 30, 40
+	w, h := 30., 40.
 	x, y := 100+50/2-w/2, 50+150/2-h/2
-	require.Equal(t, image.Rect(x, y, x+w, y+h), mock.Frame)
+	require.Equal(t, geo.Rect(x, y, x+w, y+h), mock.Frame)
 }
 
 func TestNesting(t *testing.T) {
@@ -289,7 +290,7 @@ func TestNesting(t *testing.T) {
 	// x = 300-30 = 270 to 300
 	// y = 400-40 = 360 to 400
 
-	want := image.Rect(270, 360, 300, 400)
+	want := geo.Rect(270, 360, 300, 400)
 	require.Equal(t, want, item.Frame)
 }
 
@@ -297,7 +298,7 @@ func TestMargin(t *testing.T) {
 	var tests = []struct {
 		Flex *View
 		View *View
-		Want image.Rectangle
+		Want geo.Rectangle
 	}{
 		{
 			Flex: &View{
@@ -312,7 +313,7 @@ func TestMargin(t *testing.T) {
 				Height:     50,
 				MarginLeft: 20,
 			},
-			Want: image.Rect(25+10, 25, 75+10, 75),
+			Want: geo.Rect(25+10, 25, 75+10, 75),
 		},
 		{
 			Flex: &View{
@@ -327,7 +328,7 @@ func TestMargin(t *testing.T) {
 				Height:    50,
 				MarginTop: 20,
 			},
-			Want: image.Rect(25, 25+10, 75, 75+10),
+			Want: geo.Rect(25, 25+10, 75, 75+10),
 		},
 		{
 			Flex: &View{
@@ -343,7 +344,7 @@ func TestMargin(t *testing.T) {
 				MarginTop:   10,
 				MarginRight: 10,
 			},
-			Want: image.Rect(40, 10, 90, 60),
+			Want: geo.Rect(40, 10, 90, 60),
 		},
 		{
 			Flex: &View{
@@ -359,7 +360,7 @@ func TestMargin(t *testing.T) {
 				MarginRight:  10,
 				MarginBottom: 10,
 			},
-			Want: image.Rect(40, 40, 90, 90),
+			Want: geo.Rect(40, 40, 90, 90),
 		},
 	}
 
@@ -406,8 +407,8 @@ func TestMarginedItemPosition(t *testing.T) {
 	flex.Update()
 	flex.Draw(nil)
 
-	require.Equal(t, image.Rect(0, 10, 200, 60), mocks[0].Frame)
-	require.Equal(t, image.Rect(0, 10, 200, 20), mocks[1].Frame)
+	require.Equal(t, geo.Rect(0, 10, 200, 60), mocks[0].Frame)
+	require.Equal(t, geo.Rect(0, 10, 200, 20), mocks[1].Frame)
 }
 
 func TestMultiMarginedWrapRowItems(t *testing.T) {
@@ -438,14 +439,14 @@ func TestMultiMarginedWrapRowItems(t *testing.T) {
 	flex.Update()
 	flex.Draw(nil)
 
-	assert.Equal(t, image.Rect(10, 15, 10+85, 15+85), mocks[0].Frame)
-	assert.Equal(t, image.Rect(105, 15, 105+85, 15+85), mocks[1].Frame)
-	assert.Equal(t, image.Rect(10, 110, 10+85, 110+85), mocks[2].Frame)
-	assert.Equal(t, image.Rect(105, 110, 105+85, 110+85), mocks[3].Frame)
+	assert.Equal(t, geo.Rect(10, 15, 10+85, 15+85), mocks[0].Frame)
+	assert.Equal(t, geo.Rect(105, 15, 105+85, 15+85), mocks[1].Frame)
+	assert.Equal(t, geo.Rect(10, 110, 10+85, 110+85), mocks[2].Frame)
+	assert.Equal(t, geo.Rect(105, 110, 105+85, 110+85), mocks[3].Frame)
 }
 
 func TestRemoveChild(t *testing.T) {
-	w, h := 100, 100
+	w, h := 100., 100.
 
 	flex := &View{
 		Width:      w,
@@ -470,14 +471,48 @@ func TestRemoveChild(t *testing.T) {
 	flex.Update()
 	flex.Draw(nil)
 
-	require.Equal(t, mocks[0].Frame, image.Rect(0, 25, 50, 75))
-	require.Equal(t, mocks[1].Frame, image.Rect(50, 25, 100, 75))
+	require.Equal(t, mocks[0].Frame, geo.Rect(0, 25, 50, 75))
+	require.Equal(t, mocks[1].Frame, geo.Rect(50, 25, 100, 75))
 
 	flex.RemoveChild(views[0])
 	flex.Update()
 	flex.Draw(nil)
 
-	require.Equal(t, mocks[1].Frame, image.Rect(25, 25, 75, 75))
+	require.Equal(t, mocks[1].Frame, geo.Rect(25, 25, 75, 75))
+}
+
+func TestShrink(t *testing.T) {
+	w, h, items := 128., 64., 5.
+	mock := mockHandler{}
+
+	root := &View{
+		Direction:  Row,
+		Justify:    JustifyStart,
+		AlignItems: AlignItemCenter,
+	}
+
+	palette := &View{
+		Width:     w,
+		Shrink:    1,
+		Wrap:      Wrap,
+		Direction: Column,
+		Justify:   JustifyCenter,
+		Handler:   &mock,
+	}
+	palette.AddTo(root)
+
+	for i := 0.; i < items; i++ {
+		bar := &View{
+			Width:  w,
+			Height: h,
+		}
+		bar.AddTo(palette)
+	}
+
+	root.UpdateWithSize(1000, 1000)
+	root.Draw(nil)
+
+	assert.Equal(t, geo.Pt(w, h*items), mock.Frame.Size())
 }
 
 func TestAutoExpanding(t *testing.T) {
@@ -501,8 +536,8 @@ func TestAutoExpanding(t *testing.T) {
 	flex.Update()
 	flex.Draw(nil)
 
-	assert.Equal(t, image.Rect(0, 0, 500, 1000), mocks[0].Frame)
-	assert.Equal(t, image.Rect(500, 0, 1000, 1000), mocks[1].Frame)
+	assert.Equal(t, geo.Rect(0, 0, 500, 1000), mocks[0].Frame)
+	assert.Equal(t, geo.Rect(500, 0, 1000, 1000), mocks[1].Frame)
 }
 
 func TestNestedChildrenGrow(t *testing.T) {
@@ -544,8 +579,8 @@ func TestNestedChildrenGrow(t *testing.T) {
 	flex.Update()
 	flex.Draw(nil)
 
-	assert.Equal(t, image.Rect(0, 0, 500, 1000), mocks[0].Frame)
-	assert.Equal(t, image.Rect(500, 0, 1000, 1000), mocks[1].Frame)
+	assert.Equal(t, geo.Rect(0, 0, 500, 1000), mocks[0].Frame)
+	assert.Equal(t, geo.Rect(500, 0, 1000, 1000), mocks[1].Frame)
 }
 
 func TestNestedChildGrow(t *testing.T) {
@@ -579,7 +614,7 @@ func TestNestedChildGrow(t *testing.T) {
 	flex.Update()
 	flex.Draw(nil)
 
-	assert.Equal(t, image.Rect(0, 0, 1000, 1000), mock.Frame)
+	assert.Equal(t, geo.Rect(0, 0, 1000, 1000), mock.Frame)
 }
 
 func TestMerginWithChild(t *testing.T) {
@@ -615,8 +650,8 @@ func TestMerginWithChild(t *testing.T) {
 	flex.Update()
 	flex.Draw(nil)
 
-	assert.Equal(t, image.Rect(850, 800, 950, 900), mock1.Frame)
-	assert.Equal(t, image.Rect(850, 800, 950, 900), mock2.Frame)
+	assert.Equal(t, geo.Rect(850, 800, 950, 900), mock1.Frame)
+	assert.Equal(t, geo.Rect(850, 800, 950, 900), mock2.Frame)
 }
 
 func TestStretchAndMargin(t *testing.T) {
@@ -650,8 +685,8 @@ func TestStretchAndMargin(t *testing.T) {
 	flex.Update()
 	flex.Draw(nil)
 
-	assert.Equal(t, image.Rect(0, 0, 950, 900), mock1.Frame)
-	assert.Equal(t, image.Rect(850, 800, 950, 900), mock2.Frame)
+	assert.Equal(t, geo.Rect(0, 0, 950, 900), mock1.Frame)
+	assert.Equal(t, geo.Rect(850, 800, 950, 900), mock2.Frame)
 }
 
 func TestStretchAndMarginItems(t *testing.T) {
@@ -680,8 +715,8 @@ func TestStretchAndMarginItems(t *testing.T) {
 	flex.Update()
 	flex.Draw(nil)
 
-	assert.Equal(t, image.Rect(0, 0, 450, 1000), mock1.Frame)
-	assert.Equal(t, image.Rect(550, 0, 1000, 1000), mock2.Frame)
+	assert.Equal(t, geo.Rect(0, 0, 450, 1000), mock1.Frame)
+	assert.Equal(t, geo.Rect(550, 0, 1000, 1000), mock2.Frame)
 }
 
 func TestStretchAndMarginItemsMain(t *testing.T) {
@@ -714,8 +749,8 @@ func TestStretchAndMarginItemsMain(t *testing.T) {
 	flex.Update()
 	flex.Draw(nil)
 
-	assert.Equal(t, image.Rect(0, 0, 1000, 450), mock1.Frame)
-	assert.Equal(t, image.Rect(0, 500, 1000, 950), mock2.Frame)
+	assert.Equal(t, geo.Rect(0, 0, 1000, 450), mock1.Frame)
+	assert.Equal(t, geo.Rect(0, 500, 1000, 950), mock2.Frame)
 }
 
 func TestStretchAndMarginItemsCross(t *testing.T) {
@@ -749,8 +784,8 @@ func TestStretchAndMarginItemsCross(t *testing.T) {
 	flex.Update()
 	flex.Draw(nil)
 
-	assert.Equal(t, image.Rect(0, 0, 1000, 450), mock1.Frame)
-	assert.Equal(t, image.Rect(0, 500, 1000, 950), mock2.Frame)
+	assert.Equal(t, geo.Rect(0, 0, 1000, 450), mock1.Frame)
+	assert.Equal(t, geo.Rect(0, 500, 1000, 950), mock2.Frame)
 }
 
 func TestNestedFlex(t *testing.T) {
@@ -792,9 +827,9 @@ func TestNestedFlex(t *testing.T) {
 	flex.Update()
 	flex.Draw(nil)
 
-	assert.Equal(t, image.Rect(100, 100, 900, 900), mock1.Frame)
-	assert.Equal(t, image.Rect(100+350, 100+350, 100+450, 100+450), mock2.Frame)
-	assert.Equal(t, image.Rect(100+350+45, 100+350+45, 100+350+55, 100+350+55), mock3.Frame)
+	assert.Equal(t, geo.Rect(100, 100, 900, 900), mock1.Frame)
+	assert.Equal(t, geo.Rect(100+350, 100+350, 100+450, 100+450), mock2.Frame)
+	assert.Equal(t, geo.Rect(100+350+45, 100+350+45, 100+350+55, 100+350+55), mock3.Frame)
 }
 
 func TestAbsoluteViewChildren(t *testing.T) {
@@ -834,9 +869,9 @@ func TestAbsoluteViewChildren(t *testing.T) {
 	flex.Update()
 	flex.Draw(nil)
 
-	assert.Equal(t, image.Rect(100, 100, 900, 900), mock1.Frame)
-	assert.Equal(t, image.Rect(100, 100, 200, 200), mock2.Frame)
-	assert.Equal(t, image.Rect(100, 100, 110, 110), mock3.Frame)
+	assert.Equal(t, geo.Rect(100, 100, 900, 900), mock1.Frame)
+	assert.Equal(t, geo.Rect(100, 100, 200, 200), mock2.Frame)
+	assert.Equal(t, geo.Rect(100, 100, 110, 110), mock3.Frame)
 }
 
 func TestAutoHeightCalculation(t *testing.T) {
@@ -883,8 +918,8 @@ func TestAutoHeightCalculation(t *testing.T) {
 	flex.Update()
 	flex.Draw(nil)
 
-	assert.Equal(t, image.Rect(0, 0, 100, 100), mock1.Frame)
-	assert.Equal(t, image.Rect(0, 100, 200, 300), mock2.Frame)
+	assert.Equal(t, geo.Rect(0, 0, 100, 100), mock1.Frame)
+	assert.Equal(t, geo.Rect(0, 100, 200, 300), mock2.Frame)
 }
 
 func TestWidthInPctRow(t *testing.T) {
@@ -913,7 +948,7 @@ func TestWidthInPctRow(t *testing.T) {
 	flex.Update()
 	flex.Draw(nil)
 
-	assert.Equal(t, image.Rect(0, 400, 450, 500), mock.Frame)
+	assert.Equal(t, geo.Rect(0, 400, 450, 500), mock.Frame)
 }
 
 func TestWidthInPctCol(t *testing.T) {
@@ -942,7 +977,7 @@ func TestWidthInPctCol(t *testing.T) {
 	flex.Update()
 	flex.Draw(nil)
 
-	assert.Equal(t, image.Rect(0, 400, 500, 500), mock.Frame)
+	assert.Equal(t, geo.Rect(0, 400, 500, 500), mock.Frame)
 }
 
 func TestHeightInPctRow(t *testing.T) {
@@ -971,7 +1006,7 @@ func TestHeightInPctRow(t *testing.T) {
 	flex.Update()
 	flex.Draw(nil)
 
-	assert.Equal(t, image.Rect(350, 0, 450, 500), mock.Frame)
+	assert.Equal(t, geo.Rect(350, 0, 450, 500), mock.Frame)
 }
 
 func TestHeightInPctCol(t *testing.T) {
@@ -1000,10 +1035,10 @@ func TestHeightInPctCol(t *testing.T) {
 	flex.Update()
 	flex.Draw(nil)
 
-	assert.Equal(t, image.Rect(400, 100, 500, 500), mock.Frame)
+	assert.Equal(t, geo.Rect(400, 100, 500, 500), mock.Frame)
 }
 
-func flexItemBounds(parent *View, child *View) image.Rectangle {
+func flexItemBounds(parent *View, child *View) geo.Rectangle {
 	mock := &mockHandler{}
 	child.Handler = mock
 

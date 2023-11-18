@@ -1,28 +1,23 @@
 package furex
 
 import (
-	"image"
-
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/sedyh/furex/v2/geo"
 )
 
 // Handler represents a component that can be added to a container.
 type Handler interface{}
 
-type Framer interface {
-	Frame(frame image.Rectangle) image.Rectangle
-}
-
 // Drawer represents a component that can be added to a container.
 type Drawer interface {
 	// Draw function draws the content of the component inside the frame.
-	Draw(screen *ebiten.Image, frame image.Rectangle, v *View)
+	Draw(screen *ebiten.Image, frame geo.Rectangle, v *View)
 }
 
 // Updater represents a component that updates by one tick.
 type Updater interface {
 	// Update updates the state of the component by one tick.
-	Update(frame image.Rectangle, v *View)
+	Update(frame geo.Rectangle, v *View)
 }
 
 // DrawHandler represents a component that can be added to a container.
@@ -30,7 +25,7 @@ type Updater interface {
 type DrawHandler interface {
 	// HandleDraw function draws the content of the component inside the frame.
 	// The frame parameter represents the location (x,y) and size (width,height) relative to the window (0,0).
-	HandleDraw(screen *ebiten.Image, frame image.Rectangle)
+	HandleDraw(screen *ebiten.Image, frame geo.Rectangle)
 }
 
 // UpdateHandler represents a component that updates by one tick.
@@ -72,7 +67,7 @@ type TouchHandler interface {
 
 // MouseHandler represents a component that handle mouse move.
 type MouseHandler interface {
-	// HandleMouse handles the mouch move and returns true if it handle the mouse move.
+	// HandleMouse handles the much move and returns true if it handles the mouse move.
 	// The parameter (x, y) is the location relative to the window (0,0).
 	HandleMouse(x, y int) bool
 }
@@ -83,12 +78,12 @@ type MouseLeftButtonHandler interface {
 	// The parameter (x, y) is the location relative to the window (0,0).
 	// It returns true if it handles the mouse move.
 	HandleJustPressedMouseButtonLeft(x, y int) bool
-	// HandleJustReleasedTouchID handles the touchID just released.
+	// HandleJustReleasedMouseButtonLeft handles the touchID just released.
 	// The parameter (x, y) is the location relative to the window (0,0).
 	HandleJustReleasedMouseButtonLeft(x, y int)
 }
 
-// MouseEnterHandler represets a component that handle mouse enter.
+// MouseEnterLeaveHandler represets a component that handle mouse enter.
 type MouseEnterLeaveHandler interface {
 	// HandleMouseEnter handles the mouse enter.
 	HandleMouseEnter(x, y int) bool
@@ -96,7 +91,7 @@ type MouseEnterLeaveHandler interface {
 	HandleMouseLeave()
 }
 
-// SwipeHandler represents different swipe directions.
+// SwipeDirection represents different swipe directions.
 type SwipeDirection int
 
 const (
@@ -119,7 +114,7 @@ type handler struct {
 // HandlerOpts represents the options for a handler.
 type HandlerOpts struct {
 	Update        func(v *View)
-	Draw          func(screen *ebiten.Image, frame image.Rectangle, v *View)
+	Draw          func(screen *ebiten.Image, frame geo.Rectangle, v *View)
 	HandlePress   func(x, y int, t ebiten.TouchID)
 	HandleRelease func(x, y int, isCancel bool)
 }
@@ -135,7 +130,7 @@ func (h *handler) Update(v *View) {
 	}
 }
 
-func (h *handler) Draw(screen *ebiten.Image, frame image.Rectangle, v *View) {
+func (h *handler) Draw(screen *ebiten.Image, frame geo.Rectangle, v *View) {
 	if h.opts.Draw != nil {
 		h.opts.Draw(screen, frame, v)
 	}

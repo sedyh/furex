@@ -40,8 +40,8 @@ type ParseOptions struct {
 	// Width and Height is the size of the root view.
 	// This is useful when you want to specify the width and height
 	// outside of the HTML.
-	Width  int
-	Height int
+	Width  float64
+	Height float64
 
 	// Handler is the handler for the root view.
 	Handler Handler
@@ -259,31 +259,32 @@ func parseStyle(view *View, style string) {
 	}
 }
 
-func Int(i int) *int { return &i }
+func Int(i int) *int           { return &i }
+func Float(f float64) *float64 { return &f }
 
 var styleMapper = map[string]mapper[View]{
 	"left": {
 		parseFunc: parseNumber,
-		setFunc:   setFunc(func(v *View, val int) { v.Left = val }),
+		setFunc:   setFunc(func(v *View, val float64) { v.Left = val }),
 	},
 	"right": {
 		parseFunc: parseNumber,
-		setFunc:   setFunc(func(v *View, val int) { v.Right = Int(val) }),
+		setFunc:   setFunc(func(v *View, val float64) { v.Right = Float(val) }),
 	},
 	"top": {
 		parseFunc: parseNumber,
-		setFunc:   setFunc(func(v *View, val int) { v.Top = val }),
+		setFunc:   setFunc(func(v *View, val float64) { v.Top = val }),
 	},
 	"bottom": {
 		parseFunc: parseNumber,
-		setFunc:   setFunc(func(v *View, val int) { v.Bottom = Int(val) }),
+		setFunc:   setFunc(func(v *View, val float64) { v.Bottom = Float(val) }),
 	},
 	"width": {
 		parseFunc: parseLength,
 		setFunc: setFunc(func(v *View, val cssLength) {
 			switch val.unit {
 			case cssUnitPx:
-				v.Width = int(val.val)
+				v.Width = val.val
 			case cssUnitPct:
 				v.WidthInPct = val.val
 			}
@@ -294,7 +295,7 @@ var styleMapper = map[string]mapper[View]{
 		setFunc: setFunc(func(v *View, val cssLength) {
 			switch val.unit {
 			case cssUnitPx:
-				v.Height = int(val.val)
+				v.Height = val.val
 			case cssUnitPct:
 				v.HeightInPct = val.val
 			}
@@ -302,19 +303,19 @@ var styleMapper = map[string]mapper[View]{
 	},
 	"margin-left": {
 		parseFunc: parseNumber,
-		setFunc:   setFunc(func(v *View, val int) { v.MarginLeft = val }),
+		setFunc:   setFunc(func(v *View, val float64) { v.MarginLeft = val }),
 	},
 	"margin-top": {
 		parseFunc: parseNumber,
-		setFunc:   setFunc(func(v *View, val int) { v.MarginTop = val }),
+		setFunc:   setFunc(func(v *View, val float64) { v.MarginTop = val }),
 	},
 	"margin-right": {
 		parseFunc: parseNumber,
-		setFunc:   setFunc(func(v *View, val int) { v.MarginRight = val }),
+		setFunc:   setFunc(func(v *View, val float64) { v.MarginRight = val }),
 	},
 	"margin-bottom": {
 		parseFunc: parseNumber,
-		setFunc:   setFunc(func(v *View, val int) { v.MarginBottom = val }),
+		setFunc:   setFunc(func(v *View, val float64) { v.MarginBottom = val }),
 	},
 	"position": {
 		parseFunc: parsePosition,

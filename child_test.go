@@ -1,9 +1,10 @@
 package furex
 
 import (
-	"image"
 	"testing"
 	"time"
+
+	"github.com/sedyh/furex/v2/geo"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/stretchr/testify/assert"
@@ -15,7 +16,7 @@ func TestHandlers(t *testing.T) {
 		t *testing.T,
 		flex *View,
 		h *mockHandler,
-		frame image.Rectangle,
+		frame geo.Rectangle,
 	){
 		// "button touch": testButtonTouch,
 		// "mouse click":  testMouchClick,
@@ -85,7 +86,7 @@ func TestHandlers(t *testing.T) {
 			flex.Update()
 			flex.Draw(nil)
 
-			frame := image.Rect(290, 380, 300, 400)
+			frame := geo.Rect(290, 380, 300, 400)
 			require.Equal(t, frame, h.Frame)
 
 			fn(t, flex, h, frame)
@@ -95,7 +96,7 @@ func TestHandlers(t *testing.T) {
 
 }
 
-func testButtonTouch(t *testing.T, flex *View, h *mockHandler, frame image.Rectangle) {
+func testButtonTouch(t *testing.T, flex *View, h *mockHandler, frame geo.Rectangle) {
 
 	type result struct {
 		IsPressed  bool
@@ -105,8 +106,8 @@ func testButtonTouch(t *testing.T, flex *View, h *mockHandler, frame image.Recta
 
 	var tests = []struct {
 		Scenario string
-		Start    image.Point
-		End      image.Point
+		Start    geo.Point
+		End      geo.Point
 		Want     result
 	}{
 		{
@@ -118,7 +119,7 @@ func testButtonTouch(t *testing.T, flex *View, h *mockHandler, frame image.Recta
 		{
 			Scenario: "press inside and release outside",
 			Start:    frame.Min,
-			End:      image.Pt(frame.Min.X, frame.Min.Y-1),
+			End:      geo.Pt(frame.Min.X, frame.Min.Y-1),
 			Want:     result{true, true, true},
 		},
 		{
@@ -130,13 +131,13 @@ func testButtonTouch(t *testing.T, flex *View, h *mockHandler, frame image.Recta
 		{
 			Scenario: "press inside and release outside (right-bottom)",
 			Start:    frame.Max,
-			End:      image.Pt(frame.Max.X+1, frame.Max.Y),
+			End:      geo.Pt(frame.Max.X+1, frame.Max.Y),
 			Want:     result{true, true, true},
 		},
 		{
 			Scenario: "press outside and release inside",
-			Start:    image.Pt(frame.Min.X-1, frame.Min.Y),
-			End:      image.Pt(frame.Min.X+frame.Dx()/2, frame.Min.Y+frame.Dy()/2),
+			Start:    geo.Pt(frame.Min.X-1, frame.Min.Y),
+			End:      geo.Pt(frame.Min.X+frame.Dx()/2, frame.Min.Y+frame.Dy()/2),
 			Want:     result{false, false, false},
 		},
 	}
@@ -145,15 +146,15 @@ func testButtonTouch(t *testing.T, flex *View, h *mockHandler, frame image.Recta
 		t.Run(tt.Scenario, func(t *testing.T) {
 			h.Init()
 
-			flex.HandleJustPressedTouchID(0, tt.Start.X, tt.Start.Y)
-			flex.HandleJustReleasedTouchID(0, tt.End.X, tt.End.Y)
+			flex.HandleJustPressedTouchID(0, int(tt.Start.X), int(tt.Start.Y))
+			flex.HandleJustReleasedTouchID(0, int(tt.End.X), int(tt.End.Y))
 
 			assert.Equal(t, tt.Want, result{h.IsPressed, h.IsReleased, h.IsCancel})
 		})
 	}
 }
 
-func testMouchClick(t *testing.T, flex *View, h *mockHandler, frame image.Rectangle) {
+func testMouchClick(t *testing.T, flex *View, h *mockHandler, frame geo.Rectangle) {
 
 	type result struct {
 		IsPressed  bool
@@ -163,8 +164,8 @@ func testMouchClick(t *testing.T, flex *View, h *mockHandler, frame image.Rectan
 
 	var tests = []struct {
 		Scenario string
-		Start    image.Point
-		End      image.Point
+		Start    geo.Point
+		End      geo.Point
 		Want     result
 	}{
 		{
@@ -176,7 +177,7 @@ func testMouchClick(t *testing.T, flex *View, h *mockHandler, frame image.Rectan
 		{
 			Scenario: "press inside left-top edge, release outside",
 			Start:    frame.Min,
-			End:      image.Pt(frame.Min.X, frame.Min.Y-1),
+			End:      geo.Pt(frame.Min.X, frame.Min.Y-1),
 			Want:     result{true, true, true},
 		},
 		{
@@ -188,13 +189,13 @@ func testMouchClick(t *testing.T, flex *View, h *mockHandler, frame image.Rectan
 		{
 			Scenario: "press inside righ-bottom edge, release outside",
 			Start:    frame.Max,
-			End:      image.Pt(frame.Max.X+1, frame.Max.Y),
+			End:      geo.Pt(frame.Max.X+1, frame.Max.Y),
 			Want:     result{true, true, true},
 		},
 		{
 			Scenario: "press outside, release inside",
-			Start:    image.Pt(frame.Min.X-1, frame.Min.Y),
-			End:      image.Pt(frame.Min.X+frame.Dx()/2, frame.Min.Y+frame.Dy()/2),
+			Start:    geo.Pt(frame.Min.X-1, frame.Min.Y),
+			End:      geo.Pt(frame.Min.X+frame.Dx()/2, frame.Min.Y+frame.Dy()/2),
 			Want:     result{false, false, false},
 		},
 	}
@@ -203,53 +204,53 @@ func testMouchClick(t *testing.T, flex *View, h *mockHandler, frame image.Rectan
 		t.Run(tt.Scenario, func(t *testing.T) {
 			h.Init()
 
-			flex.handleMouseButtonLeftPressed(tt.Start.X, tt.Start.Y)
-			flex.handleMouseButtonLeftReleased(tt.End.X, tt.End.Y)
+			flex.handleMouseButtonLeftPressed(int(tt.Start.X), int(tt.Start.Y))
+			flex.handleMouseButtonLeftReleased(int(tt.End.X), int(tt.End.Y))
 
 			assert.Equal(t, tt.Want, result{h.IsPressed, h.IsReleased, h.IsCancel})
 		})
 	}
 }
 
-func testMouseMove(t *testing.T, flex *View, h *mockHandler, frame image.Rectangle) {
+func testMouseMove(t *testing.T, flex *View, h *mockHandler, frame geo.Rectangle) {
 	type result struct {
 		IsMouseMoved bool
-		MousePoint   image.Point
+		MousePoint   geo.Point
 	}
 	var tests = []struct {
 		Scenario string
-		Point    image.Point
+		Point    geo.Point
 		Want     result
 	}{
 		{
 			Scenario: "move mouse left-top inside",
-			Point:    image.Point{frame.Min.X, frame.Min.Y},
-			Want:     result{IsMouseMoved: true, MousePoint: image.Point{frame.Min.X, frame.Min.Y}},
+			Point:    geo.Point{frame.Min.X, frame.Min.Y},
+			Want:     result{IsMouseMoved: true, MousePoint: geo.Point{frame.Min.X, frame.Min.Y}},
 		},
 		{
 			Scenario: "move mouse right-bottom inside",
-			Point:    image.Point{frame.Max.X, frame.Max.Y},
-			Want:     result{IsMouseMoved: true, MousePoint: image.Point{frame.Max.X, frame.Max.Y}},
+			Point:    geo.Point{frame.Max.X, frame.Max.Y},
+			Want:     result{IsMouseMoved: true, MousePoint: geo.Point{frame.Max.X, frame.Max.Y}},
 		},
 		{
 			Scenario: "move mouse left outside",
-			Point:    image.Point{frame.Min.X - 1, frame.Min.Y},
-			Want:     result{IsMouseMoved: false, MousePoint: image.Point{-1, -1}},
+			Point:    geo.Point{frame.Min.X - 1, frame.Min.Y},
+			Want:     result{IsMouseMoved: false, MousePoint: geo.Point{-1, -1}},
 		},
 		{
 			Scenario: "move mouse right outside",
-			Point:    image.Point{frame.Max.X + 1, frame.Min.Y},
-			Want:     result{IsMouseMoved: false, MousePoint: image.Point{-1, -1}},
+			Point:    geo.Point{frame.Max.X + 1, frame.Min.Y},
+			Want:     result{IsMouseMoved: false, MousePoint: geo.Point{-1, -1}},
 		},
 		{
 			Scenario: "move mouse top outside",
-			Point:    image.Point{frame.Min.X, frame.Min.Y - 1},
-			Want:     result{IsMouseMoved: false, MousePoint: image.Point{-1, -1}},
+			Point:    geo.Point{frame.Min.X, frame.Min.Y - 1},
+			Want:     result{IsMouseMoved: false, MousePoint: geo.Point{-1, -1}},
 		},
 		{
 			Scenario: "move mouse bottom outside",
-			Point:    image.Point{frame.Min.X, frame.Max.Y + 1},
-			Want:     result{IsMouseMoved: false, MousePoint: image.Point{-1, -1}},
+			Point:    geo.Point{frame.Min.X, frame.Max.Y + 1},
+			Want:     result{IsMouseMoved: false, MousePoint: geo.Point{-1, -1}},
 		},
 	}
 
@@ -257,57 +258,57 @@ func testMouseMove(t *testing.T, flex *View, h *mockHandler, frame image.Rectang
 		t.Run(tt.Scenario, func(t *testing.T) {
 			h.Init()
 
-			flex.handleMouse(tt.Point.X, tt.Point.Y)
+			flex.handleMouse(int(tt.Point.X), int(tt.Point.Y))
 
 			assert.Equal(t, tt.Want, result{h.IsMouseMoved, h.MousePoint})
 		})
 	}
 }
 
-func testSwipe(t *testing.T, flex *View, h *mockHandler, frame image.Rectangle) {
+func testSwipe(t *testing.T, flex *View, h *mockHandler, frame geo.Rectangle) {
 	type result struct {
 		IsSwiped bool
 		SwipeDir SwipeDirection
 	}
 	var tests = []struct {
 		Scenario string
-		From     image.Point
-		To       image.Point
+		From     geo.Point
+		To       geo.Point
 		Time     time.Duration
 		Want     result
 	}{
 		{
 			Scenario: "swipe left",
-			From:     image.Point{frame.Min.X, frame.Min.Y},
-			To:       image.Point{frame.Min.X - 50, frame.Min.Y},
+			From:     geo.Point{frame.Min.X, frame.Min.Y},
+			To:       geo.Point{frame.Min.X - 50, frame.Min.Y},
 			Time:     time.Duration(0),
 			Want:     result{IsSwiped: true, SwipeDir: SwipeDirectionLeft},
 		},
 		{
 			Scenario: "swipe right",
-			From:     image.Point{frame.Min.X, frame.Min.Y},
-			To:       image.Point{frame.Min.X + 50, frame.Min.Y},
+			From:     geo.Point{frame.Min.X, frame.Min.Y},
+			To:       geo.Point{frame.Min.X + 50, frame.Min.Y},
 			Time:     time.Millisecond * 50,
 			Want:     result{IsSwiped: true, SwipeDir: SwipeDirectionRight},
 		},
 		{
 			Scenario: "swipe down",
-			From:     image.Point{frame.Min.X, frame.Min.Y},
-			To:       image.Point{frame.Min.X, frame.Min.Y + 50},
+			From:     geo.Point{frame.Min.X, frame.Min.Y},
+			To:       geo.Point{frame.Min.X, frame.Min.Y + 50},
 			Time:     time.Millisecond * 50,
 			Want:     result{IsSwiped: true, SwipeDir: SwipeDirectionDown},
 		},
 		{
 			Scenario: "swipe slow",
-			From:     image.Point{frame.Min.X, frame.Min.Y},
-			To:       image.Point{frame.Min.X, frame.Min.Y + 50},
+			From:     geo.Point{frame.Min.X, frame.Min.Y},
+			To:       geo.Point{frame.Min.X, frame.Min.Y + 50},
 			Time:     time.Millisecond * 301,
 			Want:     result{IsSwiped: false},
 		},
 		{
 			Scenario: "swipe short",
-			From:     image.Point{frame.Min.X, frame.Min.Y},
-			To:       image.Point{frame.Min.X, frame.Min.Y + 49},
+			From:     geo.Point{frame.Min.X, frame.Min.Y},
+			To:       geo.Point{frame.Min.X, frame.Min.Y + 49},
 			Time:     time.Millisecond * 50,
 			Want:     result{IsSwiped: false},
 		},
@@ -317,9 +318,9 @@ func testSwipe(t *testing.T, flex *View, h *mockHandler, frame image.Rectangle) 
 		t.Run(tt.Scenario, func(t *testing.T) {
 			h.Init()
 
-			flex.HandleJustPressedTouchID(0, tt.From.X, tt.From.Y)
+			flex.HandleJustPressedTouchID(0, int(tt.From.X), int(tt.From.Y))
 			<-time.After(tt.Time)
-			flex.HandleJustReleasedTouchID(0, tt.To.X, tt.To.Y)
+			flex.HandleJustReleasedTouchID(0, int(tt.To.X), int(tt.To.Y))
 			if tt.Want.IsSwiped {
 				assert.Equal(t, tt.Want, result{h.IsSwiped, h.SwipeDir})
 			} else {
@@ -331,8 +332,8 @@ func testSwipe(t *testing.T, flex *View, h *mockHandler, frame image.Rectangle) 
 
 type mockHandler struct {
 	mockFlags
-	Frame      image.Rectangle
-	MousePoint image.Point
+	Frame      geo.Rectangle
+	MousePoint geo.Point
 	SwipeDir   SwipeDirection
 }
 
@@ -354,14 +355,14 @@ var _ SwipeHandler = (*mockHandler)(nil)
 
 func (h *mockHandler) Init() {
 	h.mockFlags = mockFlags{}
-	h.MousePoint = image.Pt(-1, -1)
+	h.MousePoint = geo.Pt(-1, -1)
 }
 
 func (h *mockHandler) HandleUpdate() {
 	h.IsUpdated = true
 }
 
-func (h *mockHandler) HandleDraw(screen *ebiten.Image, frame image.Rectangle) {
+func (h *mockHandler) HandleDraw(screen *ebiten.Image, frame geo.Rectangle) {
 	h.Frame = frame
 	h.IsDrawn = true
 }
@@ -377,7 +378,7 @@ func (h *mockHandler) HandleRelease(x, y int, isCancel bool) {
 
 func (h *mockHandler) HandleMouse(x, y int) bool {
 	h.IsMouseMoved = true
-	h.MousePoint = image.Pt(x, y)
+	h.MousePoint = geo.Pt(float64(x), float64(y))
 	return true
 }
 

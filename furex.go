@@ -4,7 +4,7 @@ import (
 	"image/color"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/yohamta/furex/v2/internal/graphic"
+	"github.com/sedyh/furex/v2/internal/graphic"
 )
 
 var (

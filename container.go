@@ -2,23 +2,24 @@ package furex
 
 import (
 	"fmt"
-	"image"
 	"image/color"
+
+	"github.com/sedyh/furex/v2/geo"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
-	"github.com/yohamta/furex/v2/internal/graphic"
+	"github.com/sedyh/furex/v2/internal/graphic"
 )
 
 type containerEmbed struct {
 	children []*child
 	isDirty  bool
-	frame    image.Rectangle
+	frame    geo.Rectangle
 	touchIDs []ebiten.TouchID
 
-	calculatedWidth  int
-	calculatedHeight int
+	calculatedWidth  float64
+	calculatedHeight float64
 }
 
 func (ct *containerEmbed) processEvent() {
@@ -26,7 +27,6 @@ func (ct *containerEmbed) processEvent() {
 	ct.handleMouseEvents()
 }
 
-// Draw draws it's children
 func (ct *containerEmbed) Draw(screen *ebiten.Image) {
 	for _, c := range ct.children {
 		ct.drawChild(screen, c)
@@ -42,14 +42,14 @@ func (ct *containerEmbed) drawChild(screen *ebiten.Image, child *child) {
 	ct.debugDraw(screen, b, child)
 }
 
-func (ct *containerEmbed) computeBounds(child *child) image.Rectangle {
+func (ct *containerEmbed) computeBounds(child *child) geo.Rectangle {
 	if child.absolute {
 		return child.bounds
 	}
 	return child.bounds.Add(ct.frame.Min)
 }
 
-func (ct *containerEmbed) handleDraw(screen *ebiten.Image, b image.Rectangle, child *child) {
+func (ct *containerEmbed) handleDraw(screen *ebiten.Image, b geo.Rectangle, child *child) {
 	if h, ok := child.item.Handler.(DrawHandler); ok {
 		h.HandleDraw(screen, b)
 		return
@@ -63,14 +63,20 @@ func (ct *containerEmbed) shouldDrawChild(child *child) bool {
 	return !child.item.Hidden && child.item.Display != DisplayNone && child.item.Handler != nil
 }
 
-func (ct *containerEmbed) debugDraw(screen *ebiten.Image, b image.Rectangle, child *child) {
+func (ct *containerEmbed) debugDraw(screen *ebiten.Image, b geo.Rectangle, child *child) {
 	if Debug {
-		pos := fmt.Sprintf("(%d, %d)-(%d, %d):%s:%s", b.Min.X, b.Min.Y, b.Max.X, b.Max.Y, child.item.TagName, child.item.ID)
+		pos := fmt.Sprintf(
+			"(%f, %f)-(%f, %f):%s:%s",
+			b.Min.X, b.Min.Y,
+			b.Max.X, b.Max.Y,
+			child.item.TagName,
+			child.item.ID,
+		)
 		graphic.FillRect(screen, &graphic.FillRectOpts{
 			Color: color.RGBA{0, 0, 0, 200},
-			Rect:  image.Rect(b.Min.X, b.Min.Y, b.Min.X+len(pos)*6, b.Min.Y+12),
+			Rect:  geo.Rect(b.Min.X, b.Min.Y, b.Min.X+float64(len(pos))*6, b.Min.Y+12),
 		})
-		ebitenutil.DebugPrintAt(screen, pos, b.Min.X, b.Min.Y)
+		ebitenutil.DebugPrintAt(screen, pos, int(b.Min.X), int(b.Min.Y))
 	}
 }
 
@@ -109,7 +115,7 @@ func (ct *containerEmbed) handleMouse(x, y int) bool {
 		}
 		mouseHandler, ok := child.item.Handler.(MouseHandler)
 		if ok && mouseHandler != nil {
-			if isInside(childFrame, x, y) {
+			if isInside(childFrame, float64(x), float64(y)) {
 				if mouseHandler.HandleMouse(x, y) {
 					return true
 				}
@@ -132,14 +138,14 @@ func (ct *containerEmbed) handleMouseEnterLeave(x, y int) bool {
 		}
 		mouseHandler, ok := child.item.Handler.(MouseEnterLeaveHandler)
 		if ok {
-			if !result && !child.isMouseEntered && isInside(childFrame, x, y) {
+			if !result && !child.isMouseEntered && isInside(childFrame, float64(x), float64(y)) {
 				if mouseHandler.HandleMouseEnter(x, y) {
 					result = true
 					child.isMouseEntered = true
 				}
 			}
 
-			if child.isMouseEntered && !isInside(childFrame, x, y) {
+			if child.isMouseEntered && !isInside(childFrame, float64(x), float64(y)) {
 				child.isMouseEntered = false
 				mouseHandler.HandleMouseLeave()
 			}
@@ -163,7 +169,7 @@ func (ct *containerEmbed) handleMouseButtonLeftPressed(x, y int) bool {
 		}
 		mouseLeftClickHandler, ok := child.item.Handler.(MouseLeftButtonHandler)
 		if ok {
-			if !result && isInside(childFrame, x, y) {
+			if !result && isInside(childFrame, float64(x), float64(y)) {
 				if mouseLeftClickHandler.HandleJustPressedMouseButtonLeft(x, y) {
 					result = true
 					child.isMouseLeftButtonHandler = true
@@ -179,7 +185,7 @@ func (ct *containerEmbed) handleMouseButtonLeftPressed(x, y int) bool {
 						break
 					}
 				}
-				if !result && isInside(childFrame, x, y) {
+				if !result && isInside(childFrame, float64(x), float64(y)) {
 					if !child.isButtonPressed {
 						child.isButtonPressed = true
 						child.isMouseLeftButtonHandler = true
@@ -217,7 +223,7 @@ func (ct *containerEmbed) handleMouseButtonLeftReleased(x, y int) {
 				if x == 0 && y == 0 {
 					button.HandleRelease(x, y, true)
 				} else {
-					button.HandleRelease(x, y, !isInside(ct.childFrame(child), x, y))
+					button.HandleRelease(x, y, !isInside(ct.childFrame(child), float64(x), float64(y)))
 				}
 			}
 		}
@@ -226,7 +232,7 @@ func (ct *containerEmbed) handleMouseButtonLeftReleased(x, y int) {
 	}
 }
 
-func isInside(r *image.Rectangle, x, y int) bool {
+func isInside(r *geo.Rectangle, x, y float64) bool {
 	return r.Min.X <= x && x <= r.Max.X && r.Min.Y <= y && y <= r.Max.Y
 }
 
@@ -260,20 +266,20 @@ func (ct *containerEmbed) handleMouseEvents() {
 	x, y := ebiten.CursorPosition()
 	ct.handleMouse(x, y)
 	ct.handleMouseEnterLeave(x, y)
-	if inpututil.IsMouseButtonJustPressed((ebiten.MouseButtonLeft)) {
+	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
 		ct.handleMouseButtonLeftPressed(x, y)
 	}
-	if inpututil.IsMouseButtonJustReleased((ebiten.MouseButtonLeft)) {
+	if inpututil.IsMouseButtonJustReleased(ebiten.MouseButtonLeft) {
 		ct.handleMouseButtonLeftReleased(x, y)
 	}
 }
 
-func (ct *containerEmbed) setFrame(frame image.Rectangle) {
+func (ct *containerEmbed) setFrame(frame geo.Rectangle) {
 	ct.frame = frame
 	ct.isDirty = true
 }
 
-func (ct *containerEmbed) childFrame(c *child) *image.Rectangle {
+func (ct *containerEmbed) childFrame(c *child) *geo.Rectangle {
 	if !c.absolute {
 		r := c.bounds.Add(ct.frame.Min)
 		return &r
